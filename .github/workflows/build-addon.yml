@@ -47,6 +47,7 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.name }}:latest
+            ${{ steps.image.outputs.name }}:0.1.11
           build-args: |
             BUILD_ARCH=amd64
             BUILD_NAME=Claude Code
