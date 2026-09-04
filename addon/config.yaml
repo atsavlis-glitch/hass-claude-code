@@ -25,12 +25,21 @@ map:
   - media:ro
 options:
   api_key: ""
+  use_bedrock: true
+  aws_region: "us-east-1"
+  aws_bedrock_token: ""
+  bedrock_model: "us.anthropic.claude-sonnet-4-6"
   model: "default"
   yolo_mode: false
   enable_embeddings: false
   additional_packages: []
+
 schema:
   api_key: "password?"
+  use_bedrock: bool
+  aws_region: str
+  aws_bedrock_token: "password?"
+  bedrock_model: str
   model: "list(default|sonnet|opus|haiku)"
   yolo_mode: bool
   enable_embeddings: bool
