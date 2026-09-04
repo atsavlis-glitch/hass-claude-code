@@ -47,11 +47,11 @@ jobs:
           push: true
           tags: |
             ${{ steps.image.outputs.name }}:latest
-            ${{ steps.image.outputs.name }}:0.1.11
+            ${{ steps.image.outputs.name }}:0.1.12
           build-args: |
             BUILD_ARCH=amd64
             BUILD_NAME=Claude Code
             BUILD_DESCRIPTION=Claude Code for Home Assistant
-            BUILD_VERSION=0.1.11
+            BUILD_VERSION=0.1.12
             BUILD_REPOSITORY=${{ github.repository }}
             BUILD_REF=${{ github.sha }}
