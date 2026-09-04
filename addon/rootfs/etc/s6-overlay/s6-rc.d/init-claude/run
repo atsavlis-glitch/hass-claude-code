@@ -8,6 +8,10 @@ declare api_key
 declare model
 declare yolo_mode
 declare enable_embeddings
+declare use_bedrock
+declare aws_region
+declare aws_bedrock_token
+declare bedrock_model
 
 bashio::log.info 'Setting up Claude Code environment...'
 
@@ -17,6 +21,11 @@ model=$(bashio::config 'model')
 yolo_mode=$(bashio::config 'yolo_mode')
 enable_embeddings=$(bashio::config 'enable_embeddings')
 
+use_bedrock=$(bashio::config 'use_bedrock')
+aws_region=$(bashio::config 'aws_region')
+aws_bedrock_token=$(bashio::config 'aws_bedrock_token')
+bedrock_model=$(bashio::config 'bedrock_model')
+
 # --- Set environment variables for all services (s6 convention: one file per var) ---
 printf '%s' "${enable_embeddings}" > /var/run/s6/container_environment/ENABLE_EMBEDDINGS
 printf '%s' "/opt/mcp-server/data/docs-search.db" > /var/run/s6/container_environment/DOCS_DB_PATH
@@ -25,11 +34,19 @@ printf '%s' "/data/models" > /var/run/s6/container_environment/MODELS_DIR
 
 # Write all config to /etc/profile.d/ so the entrypoint shell sees them
 {
-    if bashio::var.has_value "${api_key}"; then
+    if [[ "${use_bedrock}" == "true" ]]; then
+        echo "export CLAUDE_CODE_USE_BEDROCK=1"
+        echo "export AWS_REGION=\"${aws_region}\""
+        echo "export AWS_DEFAULT_REGION=\"${aws_region}\""
+        echo "export AWS_BEARER_TOKEN_BEDROCK=\"${aws_bedrock_token}\""
+        echo "export ANTHROPIC_MODEL=\"${bedrock_model}\""
+        bashio::log.info 'Claude Code configured for Amazon Bedrock.'
+    elif bashio::var.has_value "${api_key}"; then
         echo "export ANTHROPIC_API_KEY=\"${api_key}\""
     else
-        bashio::log.info 'No API key configured — use /login in Claude Code to authenticate via subscription.'
+        bashio::log.info 'No Claude authentication configured.'
     fi
+
     echo "export SUPERVISOR_TOKEN=\"${SUPERVISOR_TOKEN}\""
     echo "export DISABLE_AUTOUPDATER=1"
     echo "export CLAUDE_MODEL=\"${model}\""
