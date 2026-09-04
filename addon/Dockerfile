@@ -23,7 +23,13 @@ RUN git clone --depth 1 --branch "${DOCS_REF}" "${DOCS_REPO}" /tmp/repo && \
 
 # Install MCP server dependencies
 COPY mcp-server/package.json mcp-server/pnpm-lock.yaml* ./mcp-server/
-RUN cd mcp-server && pnpm install --frozen-lockfile 2>/dev/null || pnpm install
+RUN pnpm config set fetch-retries 6 && \
+    pnpm config set fetch-retry-factor 2 && \
+    pnpm config set fetch-retry-mintimeout 20000 && \
+    pnpm config set fetch-retry-maxtimeout 180000 && \
+    pnpm config set network-concurrency 4 && \
+    cd mcp-server && \
+    (pnpm install --frozen-lockfile || pnpm install)
 
 # Copy MCP server source
 COPY mcp-server/ ./mcp-server/
