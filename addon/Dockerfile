@@ -7,7 +7,7 @@ ARG BUILD_FROM=ghcr.io/hassio-addons/base:20.0.1
 # Stage 1: Build MCP server and pre-index docs
 # Use same Alpine version as the HA base image so native modules (better-sqlite3)
 # compile against the same Node.js version and musl libc.
-FROM node:22-alpine AS mcp-builder
+FROM node:24-alpine AS mcp-builder
 
 RUN apk add --no-cache git build-base python3 && \
     npm install -g pnpm@10
