@@ -1,0 +1,56 @@
+name: Build Home Assistant Claude Add-on
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "addon/**"
+      - ".github/workflows/build-addon.yml"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare image name
+        id: image
+        shell: bash
+        run: |
+          OWNER="${GITHUB_REPOSITORY_OWNER,,}"
+          echo "name=ghcr.io/${OWNER}/hass-claude-code" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push add-on image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./addon
+          file: ./addon/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ${{ steps.image.outputs.name }}:latest
+          build-args: |
+            BUILD_ARCH=amd64
+            BUILD_NAME=Claude Code
+            BUILD_DESCRIPTION=Claude Code for Home Assistant
+            BUILD_VERSION=0.1.11
+            BUILD_REPOSITORY=${{ github.repository }}
+            BUILD_REF=${{ github.sha }}
